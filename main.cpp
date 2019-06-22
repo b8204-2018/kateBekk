@@ -4,6 +4,7 @@
 #include <vector>
 #include <cstring>
 #include <cmath>
+#include <exception>
 
 
 using namespace std;
@@ -20,8 +21,7 @@ public:
             return ex_numb;
 
         } else {
-            cout << "File not found!";
-            fin.close();
+            throw exception(ios_base::failure);
         }
     }
 
@@ -39,8 +39,7 @@ public:
             return str;
 
         } else {
-            cout << "File not found!";
-            fin.close();
+            throw exception(ios_base::failure);
         }
     }
 
@@ -48,10 +47,11 @@ public:
 
 class Parser {
 public:
-    int *ParseringNumbs(string example) {
+    double *ParseringNumbs(string example) {
         size_t length_ex = example.length();
-        int *result = new int[length_ex];
+        double *result = new double[length_ex];
         int num = 0;
+        bool neg = false;
         string sty;
         int i = 0, j = 0;
         for (int k = 0; k < length_ex; k++) {
@@ -59,59 +59,36 @@ public:
         }
 
         while ((i < length_ex)) {
+            if (isdigit(example[i]) && i > 0) {
+
+                if (example[i - 1] == '-') {
+                    neg = true;
+                }
+            }
+
             while (isdigit(example[i])) {
                 i++;
             }
             if (i > j) {
                 sty = example.substr(j, i - j);
-                result[num] = stoi(sty);
+                if (neg == false) {
+                    result[num] = stoi(sty);
+                } else {
+                    result[num] = stoi(sty)*(-1);
+                    neg=false;
+                }
                 num++;
             } else if (example[i] == 'x') {
 
                 result[num] = 1;
                 num++;
             }
-            if ((example[i] == 'x') && (example[i + 1] == '2')) {
-                i += 3;
+            if ((example[i] == 'x') && (isdigit(example[i + 1]))) {
+                i += 2; //перепрыгиваем икс и степень
             } else i++;
             j = i;
         }
 
-        return result;
-    }
-
-    string *ParseringOps(string example) {
-        size_t length_ex = example.length();
-        string *result = new string[length_ex];
-        int num = 0;
-        string sty;
-        int i = 1, j = 1;
-        if ((example[0]) == '-') {
-            result[num] = example[0];
-            num++;
-        } else {
-            result[num] = '+';
-            num++;
-        }
-        while ((i < length_ex)) {
-            while (isdigit(example[i])) {
-                j++;
-                i++;
-            }
-            if ((example[i] == 'x') && (example[i + 1] == '2')) {
-                i += 2;
-            } else i++;
-            if (i > j) {
-                sty = example.substr(j, i - j);
-                result[num] = sty;
-                num++;
-                j = i;
-            }
-
-        }
-        if (num < length_ex) {
-            result[num] = '!';
-        }
         return result;
     }
 
@@ -129,27 +106,13 @@ public:
     double *solution(string example) override {
         double *answ = new double[2];
         int *var = parser.ParseringNumbs(example);
-        string *oop = parser.ParseringOps(example);
         double D, x1, x2;
         double a = var[0], b = var[1], c = var[2] - var[3];
-        if (oop[0] == "-") {//проверка на знаки
-            a = -a;
-        }
-        if (oop[2] == "-") {//проверка на знаки
-            b = -b;
-        }
-        if (oop[4] == "-") {//проверка на знаки
-            c = -c;
-        }
 
         D = b * b - 4 * a * c;
-        try
-        {
-            if (D <= 0)throw 1;
-        }
-        catch(int i)
-        {
-            cout << "Ошибка №" << i << " - нет корней" << endl;
+        if (D < 0) {
+            throw IRRD;
+            throw exception("Irrational radical");
         }
         x1 = (-b - sqrt(D)) / (2 * a);
         x2 = (-b + sqrt(D)) / (2 * a);
@@ -285,11 +248,11 @@ public:
 int main() {
     ReadFile readFile;
     Printer printer;
-    string path1 = "C:/cprojects/Repositorii/primerchiki/files/f1";
-    string path2 = "C:/cprojects/Repositorii/primerchiki/files/f2";
-    string path3= "C:/cprojects/Repositorii/primerchiki/files/f3";
-    string path4 = "C:/cprojects/Repositorii/primerchiki/files/f4";
-    string path5 = "C:/cprojects/Repositorii/primerchiki/files/f5";
+    string path1 = "C:/cprojects/Repositories/kateBekk/kateBekk-primerchiki/files/f1";
+    string path2 = "C:/cprojects/Repositories/kateBekk/kateBekk-primerchiki/files/f2";
+    string path3= "C:/cprojects/Repositories/kateBekk/kateBekk-primerchiki/files/f3";
+    string path4 = "C:/cprojects/Repositories/kateBekk/kateBekk-primerchiki/files/f4";
+    string path5 = "C:/cprojects/Repositories/kateBekk/kateBekk-primerchiki/files/f5";
     SolutionsLib solutionsLib;
     ExSolution1 exSol1;
     ExSolution2 exSol2;
